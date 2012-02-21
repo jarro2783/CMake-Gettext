@@ -1,0 +1,2 @@
+This is a cmake module for gettext. The usage instructions are at the top of
+GettextTranslate.cmake
