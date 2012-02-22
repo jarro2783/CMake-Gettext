@@ -5,6 +5,9 @@
 # then in any po directory where you want things to be translated, write
 #   GettextTranslate()
 #
+# Lastly, you must call find_package(gettext REQUIRED) somewhere in your 
+# top level CMakeLists.txt
+#
 # it reads variables from Makevars, one of the most important being DOMAIN
 # it reads the languages to generate from LINGUAS
 #
