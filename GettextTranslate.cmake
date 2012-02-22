@@ -5,8 +5,18 @@
 # then in any po directory where you want things to be translated, write
 #   GettextTranslate()
 #
-# Lastly, you must call find_package(gettext REQUIRED) somewhere in your 
-# top level CMakeLists.txt
+# This module also finds the gettext binaries. If these are in a non-standard
+# location, you can define the following variables to provide paths to search
+# in
+# Gettext_BINARIES  --- a path in which to look for every program
+# Gettext_XGETTEXT  --- the xgettext program
+# Gettext_MSGINIT   --- the msginit program
+# Gettext_MSGFILTER --- the msgfilter program
+# Gettext_MSGCONV   --- the msgconv program
+# Gettext_MSGMERGE  --- the msgmerge program
+# Gettext_MSGFMT    --- the msgfmt program
+# these are searched first before $PATH, so set this if you have your own
+# version that overrides the system version
 #
 # it reads variables from Makevars, one of the most important being DOMAIN
 # it reads the languages to generate from LINGUAS
@@ -25,6 +35,47 @@
 # depend on this will be added as we go
 add_custom_target(update-po)
 add_custom_target(update-gmo)
+
+#look for all the programs
+#xgettext, msginit, msgfilter, msgconv, msgmerge, msgfmt
+
+function(REQUIRE_BINARY binname varname)
+  if (defined ${${varname}-NOTFOUND})
+    message(FATAL_ERROR "Could not find " binname)
+  else()
+    message(STATUS "found " ${binname} " at " ${${varname}})
+  endif()
+endfunction()
+
+find_program(XGETTEXT_BINARY xgettext
+  HINTS ${Gettext_XGETTEXT} ${Gettext_BINARIES}
+)
+REQUIRE_BINARY(xgettext XGETTEXT_BINARY)
+
+find_program(MSGINIT_BINARY msginit
+  HINTS ${Gettext_MSGINIT} ${Gettext_BINARIES}
+)
+REQUIRE_BINARY(msginit MSGINIT_BINARY)
+
+find_program(MSGFILTER_BINARY msgfilter
+  HINTS ${Gettext_MSGFILTER} ${Gettext_BINARIES}
+)
+REQUIRE_BINARY(msgfilter MSGFILTER_BINARY)
+
+find_program(MSGCONV_BINARY msgconv
+  HINTS ${Gettext_MSGCONV} ${Gettext_BINARIES}
+)
+REQUIRE_BINARY(msgconv MSGCONV_BINARY)
+
+find_program(MSGMERGE_BINARY msgmerge
+  HINTS ${Gettext_MSGMERGE} ${Gettext_BINARIES}
+)
+REQUIRE_BINARY(msgmerge MSGMERGE_BINARY)
+
+find_program(MSGFMT_BINARY msgfmt
+  HINTS ${Gettext_MSGFMT} ${Gettext_BINARIES}
+)
+REQUIRE_BINARY(msgfmt MSGFMT_BINARY)
 
 macro(GettextTranslate)
 
@@ -84,7 +135,7 @@ macro(GettextTranslate)
   message(STATUS "options are " ${MAKEVAR_XGETTEXT_OPTIONS})
   string(REGEX MATCHALL "[^ ]+" XGETTEXT_OPTS ${MAKEVAR_XGETTEXT_OPTIONS})
   add_custom_command(OUTPUT ${TEMPLATE_FILE_ABS}
-    COMMAND xgettext ${XGETTEXT_OPTS}
+    COMMAND ${XGETTEXT_BINARY} ${XGETTEXT_OPTS}
       -o ${TEMPLATE_FILE_ABS} 
       --default-domain=${MAKEVAR_DOMAIN}
       --add-comments=TRANSLATORS:
@@ -128,11 +179,11 @@ macro(GettextTranslate)
       #generate the en@quot files
       add_custom_command(OUTPUT ${PO_FILE_NAME}
         COMMAND
-        msginit -i ${TEMPLATE_FILE_ABS} --no-translator -l ${lang} 
+        ${MSGINIT_BINARY} -i ${TEMPLATE_FILE_ABS} --no-translator -l ${lang} 
         -o - 2>/dev/null
         | sed -f ${CMAKE_CURRENT_BINARY_DIR}/${lang}.insert-header 
-        | msgconv -t UTF-8 
-        | msgfilter sed -f ${CMAKE_CURRENT_SOURCE_DIR}/`echo ${lang} 
+        | ${MSGCONV_BINARY} -t UTF-8 
+        | ${MSGFILTER_BINARY} sed -f ${CMAKE_CURRENT_SOURCE_DIR}/`echo ${lang} 
         | sed -e 's/.*@//'`.sed 2>/dev/null >
         ${PO_FILE_NAME}
         DEPENDS ${lang}.insert-header ${TEMPLATE_FILE_ABS}
@@ -143,7 +194,7 @@ macro(GettextTranslate)
 
       message(STATUS "${lang}.po depends on ${TEMPLATE_FILE_ABS}")
       add_custom_command(OUTPUT ${PO_FILE_NAME}
-        COMMAND ${GETTEXT_MSGMERGE_EXECUTABLE} --lang=${lang}
+        COMMAND ${MSGMERGE_BINARY} --lang=${lang}
           ${PO_FILE_NAME} ${TEMPLATE_FILE_ABS} 
           -o ${PO_FILE_NAME}.new
         COMMAND mv ${PO_FILE_NAME}.new ${PO_FILE_NAME}
@@ -155,7 +206,7 @@ macro(GettextTranslate)
     message(STATUS "${lang}.gmo depends on
       ${CMAKE_CURRENT_SOURCE_DIR}/${lang}.po")
     add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${lang}.gmo
-      COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} -c --statistics --verbose -o
+      COMMAND ${MSGFMT_BINARY} -c --statistics --verbose -o
         ${CMAKE_CURRENT_SOURCE_DIR}/${lang}.gmo
         ${CMAKE_CURRENT_SOURCE_DIR}/${lang}.po
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${lang}.po
