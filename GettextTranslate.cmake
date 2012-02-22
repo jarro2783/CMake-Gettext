@@ -42,8 +42,6 @@ add_custom_target(update-gmo)
 function(REQUIRE_BINARY binname varname)
   if (defined ${${varname}-NOTFOUND})
     message(FATAL_ERROR "Could not find " binname)
-  else()
-    message(STATUS "found " ${binname} " at " ${${varname}})
   endif()
 endfunction()
 
@@ -79,14 +77,13 @@ REQUIRE_BINARY(msgfmt MSGFMT_BINARY)
 
 macro(GettextTranslate)
 
-  message(STATUS "gettext translate")
-
   if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/POTFILES.in)
-    message(FATAL_ERROR "There is no POTFILES.in in this directory")
+    message(FATAL_ERROR "There is no POTFILES.in in
+    ${CMAKE_CURRENT_SOURCE_DIR}")
   endif()
 
   if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Makevars)
-    message(FATAL_ERROR "There is no Makevars in this directory")
+    message(FATAL_ERROR "There is no Makevars in ${CMAKE_CURRENT_SOURCE_DIR}")
   endif()
 
   file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/Makevars makevars
@@ -94,13 +91,10 @@ macro(GettextTranslate)
   )
 
   foreach(makevar ${makevars})
-    message(STATUS "makevar: " ${makevar})
     string(REGEX REPLACE "^([^= ]+) =[ ]?(.*)$" "\\1" MAKEVAR_KEY ${makevar})
     string(REGEX REPLACE "^([^= ]+) =[ ]?(.*)$" "\\2" 
       MAKEVAR_${MAKEVAR_KEY} ${makevar})
-    message(STATUS split: ${MAKEVAR_KEY}=${MAKEVAR_${MAKEVAR_KEY}})
   endforeach()
-  message(STATUS DOMAIN=${MAKEVAR_DOMAIN})
 
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/POTFILES.in
     ${CMAKE_CURRENT_BINARY_DIR}/POTFILES
@@ -121,7 +115,6 @@ macro(GettextTranslate)
   )
 
   foreach(potfile ${potfiles})
-    message(STATUS "using file: "${MAKEVAR_top_builddir}/${potfile})
     list(APPEND source_translatable 
       ${CMAKE_CURRENT_SOURCE_DIR}/${MAKEVAR_top_builddir}/${potfile})
   endforeach()
@@ -132,7 +125,6 @@ macro(GettextTranslate)
     ${TEMPLATE_FILE_ABS}
   )
 
-  message(STATUS "options are " ${MAKEVAR_XGETTEXT_OPTIONS})
   string(REGEX MATCHALL "[^ ]+" XGETTEXT_OPTS ${MAKEVAR_XGETTEXT_OPTIONS})
   add_custom_command(OUTPUT ${TEMPLATE_FILE_ABS}
     COMMAND ${XGETTEXT_BINARY} ${XGETTEXT_OPTS}
@@ -155,12 +147,9 @@ macro(GettextTranslate)
 
   file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/LINGUAS LINGUAS 
       REGEX "^[^#].*")
-  message(STATUS "stripped languages: " ${LINGUAS})
   string(REGEX MATCHALL "[^ ]+" languages ${LINGUAS})
 
   foreach(lang ${languages})
-    message(STATUS "language: "${lang})
-
     set(PO_FILE_NAME "${CMAKE_CURRENT_SOURCE_DIR}/${lang}.po")
     set(GMO_FILE_NAME "${CMAKE_CURRENT_SOURCE_DIR}/${lang}.gmo")
     set(PO_TARGET "generate-${MAKEVAR_DOMAIN}-${lang}-po")
@@ -192,7 +181,6 @@ macro(GettextTranslate)
 
     else()
 
-      message(STATUS "${lang}.po depends on ${TEMPLATE_FILE_ABS}")
       add_custom_command(OUTPUT ${PO_FILE_NAME}
         COMMAND ${MSGMERGE_BINARY} --lang=${lang}
           ${PO_FILE_NAME} ${TEMPLATE_FILE_ABS} 
@@ -203,8 +191,6 @@ macro(GettextTranslate)
 
     endif()
 
-    message(STATUS "${lang}.gmo depends on
-      ${CMAKE_CURRENT_SOURCE_DIR}/${lang}.po")
     add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${lang}.gmo
       COMMAND ${MSGFMT_BINARY} -c --statistics --verbose -o
         ${CMAKE_CURRENT_SOURCE_DIR}/${lang}.gmo
@@ -222,9 +208,7 @@ macro(GettextTranslate)
 
   endforeach()
 
-  message(STATUS "target update-po depends on ${po_files}")
   add_dependencies(update-po ${po_files})
-  message(STATUS "target update-gmo depends on ${gmo_files}")
   add_dependencies(update-gmo ${gmo_files})
 
 #string(REGEX MATCH "^[^=]+=(.*)$" parsed_variables ${makevars})
