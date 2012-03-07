@@ -45,6 +45,11 @@
 #
 # where ${DOMAIN} is the DOMAIN variable read from Makevars
 # and ${lang} is each language mentioned in LINGUAS
+#
+# if you want update-gmo to be added to the "all" target, then define the
+# variable GettextTranslate_ALL before including this file
+
+
 
 # add the update-po and update-gmo targets, the actual files that need to
 # depend on this will be added as we go
