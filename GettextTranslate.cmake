@@ -100,8 +100,7 @@ find_program(GettextTranslate_MSGFMT_EXECUTABLE msgfmt
 )
 REQUIRE_BINARY(msgfmt GettextTranslate_MSGFMT_EXECUTABLE)
 
-mark_as_advanced
-(
+mark_as_advanced(
   GettextTranslate_MSGCONV_EXECUTABLE 
   GettextTranslate_MSGFILTER_EXECUTABLE 
   GettextTranslate_MSGFMT_EXECUTABLE 
