@@ -169,7 +169,6 @@ macro(GettextTranslate)
       --package-name=${CMAKE_PROJECT_NAME}
     DEPENDS ${source_translatable}
     ${CMAKE_CURRENT_SOURCE_DIR}/POTFILES.in
-    #    VERBATIM
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
 
@@ -218,7 +217,7 @@ macro(GettextTranslate)
           ${PO_FILE_NAME} ${TEMPLATE_FILE_ABS} 
           -o ${PO_FILE_NAME}.new
         COMMAND mv ${PO_FILE_NAME}.new ${PO_FILE_NAME}
-        DEPENDS ${TEMPLATE_FILE_ABS}
+        DEPENDS ${MAKEVAR_DOMAIN}.pot-update
       )
 
     endif()
