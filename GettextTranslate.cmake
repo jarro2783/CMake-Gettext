@@ -48,8 +48,13 @@
 
 # add the update-po and update-gmo targets, the actual files that need to
 # depend on this will be added as we go
+
+if (DEFINED ${GettextTranslate_ALL})
+  set(_addToALL "ALL")
+endif()
+
 add_custom_target(update-po)
-add_custom_target(update-gmo)
+add_custom_target(update-gmo ${_addToALL})
 
 #look for all the programs
 #xgettext, msginit, msgfilter, msgconv, msgmerge, msgfmt
