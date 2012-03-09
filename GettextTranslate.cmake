@@ -58,6 +58,10 @@
 #
 # if you want update-gmo to be added to the "all" target, then define the
 # variable GettextTranslate_ALL before including this file
+#
+# by default, the gmo files are built in the source directory. If you want
+# them to be built in the binary directory, then define the variable
+# GettextTranslate_GMO_BINARY
 
 
 
@@ -120,6 +124,12 @@ mark_as_advanced(
 )
 
 macro(GettextTranslate)
+
+  if(GettextTranslate_GMO_BINARY)
+    set (GMO_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
+  else()
+    set (GMO_BUILD_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+  endif()
 
   if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/POTFILES.in)
     message(FATAL_ERROR "There is no POTFILES.in in
@@ -194,7 +204,7 @@ macro(GettextTranslate)
 
   foreach(lang ${languages})
     set(PO_FILE_NAME "${CMAKE_CURRENT_SOURCE_DIR}/${lang}.po")
-    set(GMO_FILE_NAME "${CMAKE_CURRENT_SOURCE_DIR}/${lang}.gmo")
+    set(GMO_FILE_NAME "${GMO_BUILD_DIR}/${lang}.gmo")
     set(PO_TARGET "generate-${MAKEVAR_DOMAIN}-${lang}-po")
     set(GMO_TARGET "generate-${MAKEVAR_DOMAIN}-${lang}-gmo")
     list(APPEND po_files ${PO_TARGET})
