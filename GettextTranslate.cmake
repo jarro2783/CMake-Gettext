@@ -241,10 +241,6 @@ macro(GettextTranslate)
           ${PO_FILE_NAME} ${TEMPLATE_FILE_ABS} 
           -o ${PO_FILE_NAME}.new
         COMMAND mv ${PO_FILE_NAME}.new ${PO_FILE_NAME}
-        #there seems to be a race making multiple *.pot, neither of these
-        #makes a difference, although the first doesn't update my language
-        #files anymore
-        #DEPENDS ${MAKEVAR_DOMAIN}.pot-update
         DEPENDS ${TEMPLATE_FILE_ABS}
       )
 
@@ -253,11 +249,12 @@ macro(GettextTranslate)
     add_custom_command(OUTPUT ${GMO_FILE_NAME}
       COMMAND ${GettextTranslate_MSGFMT_EXECUTABLE} -c --statistics --verbose 
         -o ${GMO_FILE_NAME} ${PO_FILE_NAME}
-        DEPENDS ${PO_FILE_NAME}
+        DEPENDS ${PO_TARGET}
     )
     add_custom_target(${GMO_TARGET} DEPENDS ${GMO_FILE_NAME})
 
     add_custom_target(${PO_TARGET} DEPENDS ${PO_FILE_NAME})
+    add_dependencies(${PO_TARGET} ${MAKEVAR_DOMAIN}.pot-update)
 
     install(FILES ${GMO_FILE_NAME} DESTINATION
       ${LOCALEDIR}/${lang}/LC_MESSAGES
