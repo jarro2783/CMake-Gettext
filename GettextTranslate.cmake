@@ -64,7 +64,7 @@
 # add the update-po and update-gmo targets, the actual files that need to
 # depend on this will be added as we go
 
-if (DEFINED ${GettextTranslate_ALL})
+if (DEFINED GettextTranslate_ALL)
   set(_addToALL "ALL")
 endif()
 
