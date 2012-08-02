@@ -1,2 +1,6 @@
 This is a cmake module for gettext. The usage instructions are at the top of
 GettextTranslate.cmake
+
+To submit patches or request support, contact:
+
+  Jarryd Beck <jarrydb@cse.unsw.edu.au>

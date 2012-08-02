@@ -1,4 +1,29 @@
-# This module does creates build rules for updating translation files made 
+# Copyright (c) 2012, Jarryd Beck
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# Redistributions of source code must retain the above copyright notice, this
+# list of conditions and the following disclaimer.
+# Redistributions in binary form must reproduce the above copyright notice, 
+# this list of conditions and the following disclaimer in the documentation 
+# and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+# POSSIBILITY OF SUCH DAMAGE.
+
+
+# This module creates build rules for updating translation files made 
 # with gettext
 # In your top level CMakeLists.txt, do
 #   include(GettextTranslate)
@@ -8,13 +33,13 @@
 # This module also finds the gettext binaries. If these are in a non-standard
 # location, you can define the following variables to provide paths to search
 # in
-# Gettext_BINARIES  --- a path in which to look for every program
-# Gettext_XGETTEXT  --- the xgettext program
-# Gettext_MSGINIT   --- the msginit program
-# Gettext_MSGFILTER --- the msgfilter program
-# Gettext_MSGCONV   --- the msgconv program
-# Gettext_MSGMERGE  --- the msgmerge program
-# Gettext_MSGFMT    --- the msgfmt program
+# GettextTranslate_BINARIES  --- a path in which to look for every program
+# GettextTranslate_XGETTEXT  --- the xgettext program
+# GettextTranslate_MSGINIT   --- the msginit program
+# GettextTranslate_MSGFILTER --- the msgfilter program
+# GettextTranslate_MSGCONV   --- the msgconv program
+# GettextTranslate_MSGMERGE  --- the msgmerge program
+# GettextTranslate_MSGFMT    --- the msgfmt program
 # these are searched first before $PATH, so set this if you have your own
 # version that overrides the system version
 #
@@ -30,11 +55,25 @@
 #
 # where ${DOMAIN} is the DOMAIN variable read from Makevars
 # and ${lang} is each language mentioned in LINGUAS
+#
+# if you want update-gmo to be added to the "all" target, then define the
+# variable GettextTranslate_ALL before including this file
+#
+# by default, the gmo files are built in the source directory. If you want
+# them to be built in the binary directory, then define the variable
+# GettextTranslate_GMO_BINARY
+
+
 
 # add the update-po and update-gmo targets, the actual files that need to
 # depend on this will be added as we go
+
+if (DEFINED GettextTranslate_ALL)
+  set(_addToALL "ALL")
+endif()
+
 add_custom_target(update-po)
-add_custom_target(update-gmo)
+add_custom_target(update-gmo ${_addToALL})
 
 #look for all the programs
 #xgettext, msginit, msgfilter, msgconv, msgmerge, msgfmt
@@ -45,37 +84,52 @@ function(REQUIRE_BINARY binname varname)
   endif()
 endfunction()
 
-find_program(XGETTEXT_BINARY xgettext
-  HINTS ${Gettext_XGETTEXT} ${Gettext_BINARIES}
+find_program(GettextTranslate_XGETTEXT_EXECUTABLE xgettext
+  HINTS ${GettextTranslate_XGETTEXT} ${GettextTranslate_BINARIES}
 )
-REQUIRE_BINARY(xgettext XGETTEXT_BINARY)
+REQUIRE_BINARY(xgettext GettextTranslate_XGETTEXT_EXECUTABLE)
 
-find_program(MSGINIT_BINARY msginit
-  HINTS ${Gettext_MSGINIT} ${Gettext_BINARIES}
+find_program(GettextTranslate_MSGINIT_EXECUTABLE msginit
+  HINTS ${GettextTranslate_MSGINIT} ${GettextTranslate_BINARIES}
 )
-REQUIRE_BINARY(msginit MSGINIT_BINARY)
+REQUIRE_BINARY(msginit GettextTranslate_MSGINIT_EXECUTABLE)
 
-find_program(MSGFILTER_BINARY msgfilter
-  HINTS ${Gettext_MSGFILTER} ${Gettext_BINARIES}
+find_program(GettextTranslate_MSGFILTER_EXECUTABLE msgfilter
+  HINTS ${GettextTranslate_MSGFILTER} ${GettextTranslate_BINARIES}
 )
-REQUIRE_BINARY(msgfilter MSGFILTER_BINARY)
+REQUIRE_BINARY(msgfilter GettextTranslate_MSGFILTER_EXECUTABLE)
 
-find_program(MSGCONV_BINARY msgconv
-  HINTS ${Gettext_MSGCONV} ${Gettext_BINARIES}
+find_program(GettextTranslate_MSGCONV_EXECUTABLE msgconv
+  HINTS ${GettextTranslate_MSGCONV} ${GettextTranslate_BINARIES}
 )
-REQUIRE_BINARY(msgconv MSGCONV_BINARY)
+REQUIRE_BINARY(msgconv GettextTranslate_MSGCONV_EXECUTABLE)
 
-find_program(MSGMERGE_BINARY msgmerge
-  HINTS ${Gettext_MSGMERGE} ${Gettext_BINARIES}
+find_program(GettextTranslate_MSGMERGE_EXECUTABLE msgmerge
+  HINTS ${GettextTranslate_MSGMERGE} ${GettextTranslate_BINARIES}
 )
-REQUIRE_BINARY(msgmerge MSGMERGE_BINARY)
+REQUIRE_BINARY(msgmerge GettextTranslate_MSGMERGE_EXECUTABLE)
 
-find_program(MSGFMT_BINARY msgfmt
-  HINTS ${Gettext_MSGFMT} ${Gettext_BINARIES}
+find_program(GettextTranslate_MSGFMT_EXECUTABLE msgfmt
+  HINTS ${GettextTranslate_MSGFMT} ${GettextTranslate_BINARIES}
 )
-REQUIRE_BINARY(msgfmt MSGFMT_BINARY)
+REQUIRE_BINARY(msgfmt GettextTranslate_MSGFMT_EXECUTABLE)
+
+mark_as_advanced(
+  GettextTranslate_MSGCONV_EXECUTABLE 
+  GettextTranslate_MSGFILTER_EXECUTABLE 
+  GettextTranslate_MSGFMT_EXECUTABLE 
+  GettextTranslate_MSGINIT_EXECUTABLE 
+  GettextTranslate_MSGMERGE_EXECUTABLE 
+  GettextTranslate_XGETTEXT_EXECUTABLE
+)
 
 macro(GettextTranslate)
+
+  if(GettextTranslate_GMO_BINARY)
+    set (GMO_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
+  else()
+    set (GMO_BUILD_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+  endif()
 
   if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/POTFILES.in)
     message(FATAL_ERROR "There is no POTFILES.in in
@@ -127,19 +181,18 @@ macro(GettextTranslate)
   #)
 
   add_custom_target(${MAKEVAR_DOMAIN}.pot-update
-    COMMAND ${XGETTEXT_BINARY} ${XGETTEXT_OPTS}
+    COMMAND ${GettextTranslate_XGETTEXT_EXECUTABLE} ${XGETTEXT_OPTS}
       -o ${TEMPLATE_FILE_ABS} 
       --default-domain=${MAKEVAR_DOMAIN}
       --add-comments=TRANSLATORS:
       --copyright-holder=${MAKEVAR_COPYRIGHT_HOLDER}
       --msgid-bugs-address="${MAKEVAR_MSGID_BUGS_ADDRESS}"
       --directory=${MAKEVAR_top_builddir}
-      --files-from=${CMAKE_CURRENT_SOURCE_DIR}/POTFILES.in
+      --files-from=${CMAKE_CURRENT_BINARY_DIR}/POTFILES
       --package-version=${VERSION}
       --package-name=${CMAKE_PROJECT_NAME}
     DEPENDS ${source_translatable}
     ${CMAKE_CURRENT_SOURCE_DIR}/POTFILES.in
-    #    VERBATIM
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
 
@@ -167,7 +220,7 @@ macro(GettextTranslate)
 
   foreach(lang ${languages})
     set(PO_FILE_NAME "${CMAKE_CURRENT_SOURCE_DIR}/${lang}.po")
-    set(GMO_FILE_NAME "${CMAKE_CURRENT_SOURCE_DIR}/${lang}.gmo")
+    set(GMO_FILE_NAME "${GMO_BUILD_DIR}/${lang}.gmo")
     set(PO_TARGET "generate-${MAKEVAR_DOMAIN}-${lang}-po")
     set(GMO_TARGET "generate-${MAKEVAR_DOMAIN}-${lang}-gmo")
     list(APPEND po_files ${PO_TARGET})
@@ -184,11 +237,13 @@ macro(GettextTranslate)
       #generate the en@quot files
       add_custom_command(OUTPUT ${PO_FILE_NAME}
         COMMAND
-        ${MSGINIT_BINARY} -i ${TEMPLATE_FILE_ABS} --no-translator -l ${lang} 
+        ${GettextTranslate_MSGINIT_EXECUTABLE} -i ${TEMPLATE_FILE_ABS} 
+        --no-translator -l ${lang} 
         -o - 2>/dev/null
         | sed -f ${CMAKE_CURRENT_BINARY_DIR}/${lang}.insert-header 
-        | ${MSGCONV_BINARY} -t UTF-8 
-        | ${MSGFILTER_BINARY} sed -f ${CMAKE_CURRENT_SOURCE_DIR}/`echo ${lang} 
+        | ${GettextTranslate_MSGCONV_EXECUTABLE} -t UTF-8 
+        | ${GettextTranslate_MSGFILTER_EXECUTABLE} sed -f 
+          ${CMAKE_CURRENT_SOURCE_DIR}/`echo ${lang} 
         | sed -e 's/.*@//'`.sed 2>/dev/null >
         ${PO_FILE_NAME}
         DEPENDS ${lang}.insert-header ${TEMPLATE_FILE_ABS}
@@ -198,7 +253,7 @@ macro(GettextTranslate)
     else()
 
       add_custom_command(OUTPUT ${PO_FILE_NAME}
-        COMMAND ${MSGMERGE_BINARY} --lang=${lang}
+        COMMAND ${GettextTranslate_MSGMERGE_EXECUTABLE} --lang=${lang}
           ${PO_FILE_NAME} ${TEMPLATE_FILE_ABS} 
           -o ${PO_FILE_NAME}.new
         COMMAND mv ${PO_FILE_NAME}.new ${PO_FILE_NAME}
@@ -207,15 +262,15 @@ macro(GettextTranslate)
 
     endif()
 
-    add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${lang}.gmo
-      COMMAND ${MSGFMT_BINARY} -c --statistics --verbose -o
-        ${CMAKE_CURRENT_SOURCE_DIR}/${lang}.gmo
-        ${CMAKE_CURRENT_SOURCE_DIR}/${lang}.po
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${lang}.po
+    add_custom_command(OUTPUT ${GMO_FILE_NAME}
+      COMMAND ${GettextTranslate_MSGFMT_EXECUTABLE} -c --statistics --verbose 
+        -o ${GMO_FILE_NAME} ${PO_FILE_NAME}
+        DEPENDS ${PO_TARGET}
     )
     add_custom_target(${GMO_TARGET} DEPENDS ${GMO_FILE_NAME})
 
     add_custom_target(${PO_TARGET} DEPENDS ${PO_FILE_NAME})
+    add_dependencies(${PO_TARGET} ${MAKEVAR_DOMAIN}.pot-update)
 
     install(FILES ${GMO_FILE_NAME} DESTINATION
       ${LOCALEDIR}/${lang}/LC_MESSAGES
