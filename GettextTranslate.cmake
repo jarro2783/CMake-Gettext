@@ -121,12 +121,12 @@ macro(GettextTranslate)
 
   set(TEMPLATE_FILE ${MAKEVAR_DOMAIN}.pot)
   set(TEMPLATE_FILE_ABS ${CMAKE_CURRENT_SOURCE_DIR}/${TEMPLATE_FILE})
-  add_custom_target(${MAKEVAR_DOMAIN}.pot-update DEPENDS
-    ${TEMPLATE_FILE_ABS}
-  )
-
   string(REGEX MATCHALL "[^ ]+" XGETTEXT_OPTS ${MAKEVAR_XGETTEXT_OPTIONS})
-  add_custom_command(OUTPUT ${TEMPLATE_FILE_ABS}
+  #add_custom_target(${MAKEVAR_DOMAIN}.pot-update DEPENDS
+  #  ${TEMPLATE_FILE_ABS}
+  #)
+
+  add_custom_target(${MAKEVAR_DOMAIN}.pot-update
     COMMAND ${XGETTEXT_BINARY} ${XGETTEXT_OPTS}
       -o ${TEMPLATE_FILE_ABS} 
       --default-domain=${MAKEVAR_DOMAIN}
@@ -143,7 +143,23 @@ macro(GettextTranslate)
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
 
-  add_dependencies(update-po ${MAKEVAR_DOMAIN}.pot-update)
+  #add_custom_command(OUTPUT ${TEMPLATE_FILE_ABS}
+  #  COMMAND ${GettextTranslate_XGETTEXT_EXECUTABLE} ${XGETTEXT_OPTS}
+  #    -o ${TEMPLATE_FILE_ABS} 
+  #    --default-domain=${MAKEVAR_DOMAIN}
+  #    --add-comments=TRANSLATORS:
+  #    --copyright-holder=${MAKEVAR_COPYRIGHT_HOLDER}
+  #    --msgid-bugs-address="${MAKEVAR_MSGID_BUGS_ADDRESS}"
+  #    --directory=${MAKEVAR_top_builddir}
+  #    --files-from=${CMAKE_CURRENT_BINARY_DIR}/POTFILES
+  #    --package-version=${VERSION}
+  #    --package-name=${CMAKE_PROJECT_NAME}
+  #  DEPENDS ${source_translatable}
+  #  ${CMAKE_CURRENT_SOURCE_DIR}/POTFILES.in
+  #  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  #)
+
+  #add_dependencies(update-po ${MAKEVAR_DOMAIN}.pot-update)
 
   file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/LINGUAS LINGUAS 
       REGEX "^[^#].*")
