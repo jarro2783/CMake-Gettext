@@ -161,8 +161,8 @@ macro(GettextTranslate)
   )
 
   #set the directory to not clean
-  set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    PROPERTY CLEAN_NO_CUSTOM true)
+  #set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  #  PROPERTY CLEAN_NO_CUSTOM true)
 
   file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/POTFILES.in potfiles
     REGEX "^[^#].*"
@@ -235,7 +235,7 @@ macro(GettextTranslate)
       )
 
       #generate the en@quot files
-      add_custom_command(OUTPUT ${PO_FILE_NAME}
+      add_custom_target(${PO_TARGET}
         COMMAND
         ${GettextTranslate_MSGINIT_EXECUTABLE} -i ${TEMPLATE_FILE_ABS} 
         --no-translator -l ${lang} 
@@ -252,7 +252,7 @@ macro(GettextTranslate)
 
     else()
 
-      add_custom_command(OUTPUT ${PO_FILE_NAME}
+      add_custom_target(${PO_TARGET}
         COMMAND ${GettextTranslate_MSGMERGE_EXECUTABLE} --lang=${lang}
           ${PO_FILE_NAME} ${TEMPLATE_FILE_ABS} 
           -o ${PO_FILE_NAME}.new
@@ -262,14 +262,12 @@ macro(GettextTranslate)
 
     endif()
 
-    add_custom_command(OUTPUT ${GMO_FILE_NAME}
+    add_custom_target(${GMO_TARGET}
       COMMAND ${GettextTranslate_MSGFMT_EXECUTABLE} -c --statistics --verbose 
         -o ${GMO_FILE_NAME} ${PO_FILE_NAME}
         DEPENDS ${PO_TARGET}
     )
-    add_custom_target(${GMO_TARGET} DEPENDS ${GMO_FILE_NAME})
 
-    add_custom_target(${PO_TARGET} DEPENDS ${PO_FILE_NAME})
     add_dependencies(${PO_TARGET} ${MAKEVAR_DOMAIN}.pot-update)
 
     install(FILES ${GMO_FILE_NAME} DESTINATION
