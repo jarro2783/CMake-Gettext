@@ -79,8 +79,8 @@ add_custom_target(update-gmo ${_addToALL})
 #xgettext, msginit, msgfilter, msgconv, msgmerge, msgfmt
 
 function(REQUIRE_BINARY binname varname)
-  if (defined ${${varname}-NOTFOUND})
-    message(FATAL_ERROR "Could not find " binname)
+  if (${${varname}} STREQUAL "${varname}-NOTFOUND")
+    message(FATAL_ERROR "Could not find " ${binname})
   endif()
 endfunction()
 
